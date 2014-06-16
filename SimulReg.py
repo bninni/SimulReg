@@ -112,15 +112,15 @@ class SimulRegWidget:
   
   #to add connection and set up as server
   def addServerConnection(self):
-    if self.connection_node.SetTypeServer(int(self.port_field.text)) == 1:
-      self.connection_node.Start()
-    self.finishConnection()
+    if self.connection_node.SetTypeServer(int(self.port_field.text)): == 1:
+      if self.connection_node.Start() == 1:
+        self.finishConnection()
       
   #to add a connection and set up as client
   def addClientConnection(self):
     if self.connection_node.SetTypeClient(self.server_field.text, int(self.port_field.text)) == 1:
-      self.connection_node.Start()
-    self.finishConnection()
+      if self.connection_node.Start() == 1:
+        self.finishConnection()
       
   #to finish the "Add Connection Routine"
   def finishConnection(self):
@@ -146,10 +146,12 @@ class SimulRegWidget:
         ############################
         ############################
         print run
+        
   #to send a volume through the connection node:
   def sendVolume(self):
     #get the volume node and register it as an outgoing node
     self.connection_node.RegisterOutgoingMRMLNode(self.volumes_list.GetItemAsObject(self.volume_dropdown.currentIndex))
+    self.connection_node.PushNode(self.volumes_list.GetItemAsObject(self.volume_dropdown.currentIndex))
   
   #to update the list of volumes in this scene
   def generateVolumesDropdown(self):
