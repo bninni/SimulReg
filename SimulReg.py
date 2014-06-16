@@ -33,7 +33,7 @@ class SimulRegWidget:
       self.setup()
       self.parent.show()
     
-    #create the connection node
+    #initialize some variables and settings
     self.connection_node = slicer.vtkMRMLIGTLConnectorNode()
     slicer.mrmlScene.AddNode(self.connection_node)
     self.next_node = 0
@@ -41,11 +41,13 @@ class SimulRegWidget:
   def setup(self):
     # The Link Section
     ##### Collapsible Layout
-    self.connect_collapsible_button = ctk.ctkCollapsibleButton()
-    self.connect_collapsible_button.text = "Connect"
-    self.connect_collapsible_button.resize(150,150)
+    self.connect_collapsible_button = qt.QPushButton("Connect")
+    self.connect_collapsible_button.connect('clicked(bool)', self.toggleConnectLayout)
     self.layout.addWidget(self.connect_collapsible_button)
-    self.connect_form_layout = qt.QFormLayout(self.connect_collapsible_button)
+    self.connect_collapsible_layout = qt.QListView()
+    self.connect_form_layout = qt.QFormLayout(self.connect_collapsible_layout)
+    self.connect_collapsible_layout.setFixedHeight(125)
+    self.layout.addWidget(self.connect_collapsible_layout)
     ########## Collapsible Layout Widgets
     self.server_field = qt.QLineEdit()
     self.server_field.setText('Server')
@@ -70,12 +72,15 @@ class SimulRegWidget:
     
     # The Share Volume Section
     ##### Collapsible Layout
-    self.share_collapsible_button = ctk.ctkCollapsibleButton()
-    self.share_collapsible_button.setVisible(0)
-    self.share_collapsible_button.text = "Share Volume"
-    self.share_collapsible_button.resize(150,150)
+    self.share_collapsible_button = qt.QPushButton("Share Volume")
+    self.share_collapsible_button.connect('clicked(bool)', self.toggleShareLayout)
     self.layout.addWidget(self.share_collapsible_button)
-    self.share_form_layout = qt.QFormLayout(self.share_collapsible_button)
+    self.share_collapsible_button.setEnabled(0)
+    self.share_collapsible_layout = qt.QListView()
+    self.layout.addWidget(self.share_collapsible_layout)
+    self.share_collapsible_layout.setVisible(0)
+    self.share_collapsible_layout.setFixedHeight(75)
+    self.share_form_layout = qt.QFormLayout(self.share_collapsible_layout)
     #####The 'Share' Form
     ########## 'Share' Button
     self.share_button = qt.QPushButton("Send Volume")
@@ -90,6 +95,21 @@ class SimulRegWidget:
     self.addCheck = slicer.mrmlScene.AddObserver(slicer.vtkMRMLScene.NodeAddedEvent,self.updateNodeList)
     self.removeCheck = slicer.mrmlScene.AddObserver(slicer.vtkMRMLScene.NodeRemovedEvent,self.updateNodeList)
     
+    
+  #to toggle the show/hide of the connect layout
+  def toggleConnectLayout(self):
+    if self.connect_collapsible_layout.height:
+      self.connect_collapsible_layout.setFixedHeight(0)
+    else:
+      self.connect_collapsible_layout.setFixedHeight(125)    
+    
+  #to toggle the show/hide of the connect layout
+  def toggleShareLayout(self):
+    if self.share_collapsible_layout.height:
+      self.share_collapsible_layout.setFixedHeight(0)
+    else:
+      self.share_collapsible_layout.setFixedHeight(75)
+  
   #to add connection and set up as server
   def addServerConnection(self):
     if self.connection_node.SetTypeServer(int(self.port_field.text)) == 1:
@@ -106,14 +126,15 @@ class SimulRegWidget:
   def finishConnection(self):
     self.receiveCheck = self.connection_node.AddObserver('ReceiveEvent', self.runRegistration)
     #self.receiveCheck = self.connection_node.AddObserver('ModifiedEvent', self.runRegistration)
-    self.connect_collapsible_button.setVisible(0)
-    self.share_collapsible_button.setVisible(1)
+    self.connect_collapsible_layout.setVisible(0)
+    self.connect_collapsible_button.setEnabled(0)
+    self.share_collapsible_button.setEnabled(1)
+    self.share_collapsible_layout.setVisible(1)
       
   #to run the registration on a client computer when a new node is received
   def runRegistration(self, caller, event):
     #get the latest node
     self.new_node = self.connection_node.GetIncomingMRMLNode(self.next_node)
-    print self.next_node
     #only run if it is a volume node
     if self.new_node is not None:
       #increase the node index
