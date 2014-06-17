@@ -49,26 +49,17 @@ class SimulRegWidget:
     self.connect_collapsible_layout.setFixedHeight(125)
     self.layout.addWidget(self.connect_collapsible_layout)
     ########## Collapsible Layout Widgets
-    self.server_field = qt.QLineEdit()
-    self.server_field.setText('Server')
     self.port_field = qt.QLineEdit()
-    self.port_field.setText('Port')
+    self.port_field.setText('18944')
     self.connect_server_button = qt.QPushButton("Connect as Server")
     self.connect_server_button.connect('clicked(bool)', self.addServerConnection)
     self.connect_server_button.toolTip = "Add a networked computer to communicate with."
     self.connect_client_button = qt.QPushButton("Connect as Client")
     self.connect_client_button.connect('clicked(bool)', self.addClientConnection)
     self.connect_client_button.toolTip = "Add a networked computer to communicate with."
-    self.connect_form_layout.addWidget(self.server_field)
     self.connect_form_layout.addWidget(self.port_field)
     self.connect_form_layout.addWidget(self.connect_server_button)
     self.connect_form_layout.addWidget(self.connect_client_button)
-    
-    ##### Add Link Error Message
-    self.link_error_window = qt.QMessageBox()
-    self.link_error_window.setIcon(3)
-    self.link_error_window.setText("Error: Couldn't connect to server")
-    self.link_error_window.addButton(0x00000400)
     
     # The Share Volume Section
     ##### Collapsible Layout
@@ -112,24 +103,18 @@ class SimulRegWidget:
   
   #to add connection and set up as server
   def addServerConnection(self):
-    if self.connection_node.SetTypeServer(int(self.port_field.text)): == 1:
+    if self.connection_node.SetTypeServer(int(self.port_field.text)) == 1:
       if self.connection_node.Start() == 1:
-        self.finishConnection()
+        self.connect_collapsible_layout.setVisible(0)
+        self.connect_collapsible_button.setEnabled(0)
+        self.share_collapsible_button.setEnabled(1)
+        self.share_collapsible_layout.setVisible(1)
       
   #to add a connection and set up as client
   def addClientConnection(self):
-    if self.connection_node.SetTypeClient(self.server_field.text, int(self.port_field.text)) == 1:
+    if self.connection_node.SetTypeClient('192.168.10.1', int(self.port_field.text)) == 1:
       if self.connection_node.Start() == 1:
-        self.finishConnection()
-      
-  #to finish the "Add Connection Routine"
-  def finishConnection(self):
-    self.receiveCheck = self.connection_node.AddObserver('ReceiveEvent', self.runRegistration)
-    #self.receiveCheck = self.connection_node.AddObserver('ModifiedEvent', self.runRegistration)
-    self.connect_collapsible_layout.setVisible(0)
-    self.connect_collapsible_button.setEnabled(0)
-    self.share_collapsible_button.setEnabled(1)
-    self.share_collapsible_layout.setVisible(1)
+        self.receiveCheck = self.connection_node.AddObserver('ReceiveEvent', self.runRegistration)
       
   #to run the registration on a client computer when a new node is received
   def runRegistration(self, caller, event):
@@ -140,12 +125,9 @@ class SimulRegWidget:
       #increase the node index
       self.next_node = self.next_node + 1
       if self.new_node.GetNodeTagName() == 'Volume':
-        ############################
-        ############################
-        ##code to run registration##
-        ############################
-        ############################
-        print run
+        slicer.modules.IGITRegWidget.stageRegistration(slicer.modules.IGITRegWidget.inputSelector.currentNode(),self.new_node)
+        slicer.modules.IGITRegWidget.doRegistration(slicer.modules.IGITRegWidget.inputSelector.currentNode(),self.new_node)
+        slicer.modules.IGITRegWidget.onReadRegButton()
         
   #to send a volume through the connection node:
   def sendVolume(self):
