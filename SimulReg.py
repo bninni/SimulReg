@@ -46,7 +46,7 @@ class SimulRegWidget:
     self.layout.addWidget(self.connect_collapsible_button)
     self.connect_collapsible_layout = qt.QListView()
     self.connect_form_layout = qt.QFormLayout(self.connect_collapsible_layout)
-    self.connect_collapsible_layout.setFixedHeight(125)
+    self.connect_collapsible_layout.setFixedHeight(100)
     self.layout.addWidget(self.connect_collapsible_layout)
     ########## Collapsible Layout Widgets
     self.port_field = qt.QLineEdit()
@@ -86,13 +86,15 @@ class SimulRegWidget:
     self.addCheck = slicer.mrmlScene.AddObserver(slicer.vtkMRMLScene.NodeAddedEvent,self.updateNodeList)
     self.removeCheck = slicer.mrmlScene.AddObserver(slicer.vtkMRMLScene.NodeRemovedEvent,self.updateNodeList)
     
+    # Add vertical spacer
+    self.layout.addStretch(1)
     
   #to toggle the show/hide of the connect layout
   def toggleConnectLayout(self):
     if self.connect_collapsible_layout.height:
       self.connect_collapsible_layout.setFixedHeight(0)
     else:
-      self.connect_collapsible_layout.setFixedHeight(125)    
+      self.connect_collapsible_layout.setFixedHeight(100)    
     
   #to toggle the show/hide of the connect layout
   def toggleShareLayout(self):
