@@ -129,9 +129,10 @@ class SimulRegWidget:
         
   #to send a volume through the connection node:
   def sendVolume(self):
-    #get the volume node and register it as an outgoing node
-    self.connection_node.RegisterOutgoingMRMLNode(self.volumes_list.GetItemAsObject(self.volume_dropdown.currentIndex))
-    self.connection_node.PushNode(self.volumes_list.GetItemAsObject(self.volume_dropdown.currentIndex))
+    #get the volume node and register it as an outgoing node (if the status is "Connected"
+    if self.connection_node.GetState() == 2:
+      self.connection_node.RegisterOutgoingMRMLNode(self.volumes_list.GetItemAsObject(self.volume_dropdown.currentIndex))
+      self.connection_node.PushNode(self.volumes_list.GetItemAsObject(self.volume_dropdown.currentIndex))
   
   #to update the state
   def updateStatus(self, caller, event):
